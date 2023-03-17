@@ -68,7 +68,38 @@ void each_subject_enrolled_at_most_once(CNF *formula, unsigned num_of_subjects, 
     assert(num_of_subjects > 0);
     assert(num_of_semesters > 0);
 
-    // ZDE PRIDAT KOD
+    /*
+     * p = subject (predmet)
+     * s = semester
+     *
+     * For every two semesters check if subject is enrolled at most once
+     * ¬x(p, s) ⋁ ¬x(p, s+1)
+     *
+     * Repeat for every subject and semester
+     * ( ¬x(p, s) ⋁ ¬x(p, s+1) ) ⋀ ( ¬x(p, s) ⋁ ¬x(p, s+2) ) ... ( ¬x(p, s) ⋁ ¬x(p, s+n) ) ⋀
+     * ( ¬x(p, s+1) ⋁ ¬x(p, s+2) ) ⋀ ( ¬x(p, s+1) ⋁ ¬x(p, s+3) ) ... ( ¬x(p, s+1) ⋁ ¬x(p, s+n) ) ...
+     * ( ¬x(p, s+m) ⋁ ¬x(p, s+1) ) ⋀ ( ¬x(p, s+m) ⋁ ¬x(p, s+2) ) ... ( ¬x(p, s+m) ⋁ ¬x(p, s+n) ) ⋀
+     * ( ¬x(p+1, s+m) ⋁ ¬x(p+1, s+1) ) ⋀ ( ¬x(p+1, s+m) ⋁ ¬x(p+1, s+2) ) ... ( ¬x(p+1, s+m) ⋁ ¬x(p+1, s+n) ) ...
+     * ( ¬x(p+o, s+m) ⋁ ¬x(p+o, s+1) ) ⋀ ( ¬x(p+o, s+m) ⋁ ¬x(p+o, s+2) ) ... ( ¬x(p+o, s+m) ⋁ ¬x(p+o, s+n) )
+     * */
+
+    for (int i = 0; i < num_of_subjects; ++i) {
+        for (int j = 0; j < num_of_semesters; ++j) {
+            for (int k = j + 1; k < num_of_semesters; ++k) {
+                // Create a new clause for two different semesters and every subject
+                Clause *subject_enrolled_at_most_once = create_new_clause(num_of_subjects, num_of_semesters);
+
+                // Add literal for two different semesters
+                // ¬x(p, s)
+                add_literal_to_clause(subject_enrolled_at_most_once, false, i, j);
+                // ¬x(p, s+1)
+                add_literal_to_clause(subject_enrolled_at_most_once, false, i, k);
+
+                // Add clause to formula
+                add_clause_to_formula(subject_enrolled_at_most_once, formula);
+            }
+        }
+    }
 }
 
 
