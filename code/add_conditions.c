@@ -34,7 +34,30 @@ void each_subject_enrolled_at_least_once(CNF *formula, unsigned num_of_subjects,
     assert(num_of_subjects > 0);
     assert(num_of_semesters > 0);
 
-    // ZDE PRIDAT KOD
+    /*
+     * p = subject (predmet)
+     * s = semester
+     *
+     * Is subject enrolled in at least one semester
+     * x(p, s) ⋁ x(p, s+1) ⋁ x(p, s+2) ... x(p, s+n)
+     *
+     * Is every subject enrolled at least once
+     * ( x(p, s) ⋁ x(p, s+1) ⋁ x(p, s+2) ... x(p, s+n) ) ⋀ ( x(p+1, s) ⋁ x(p+1, s+1) ⋁ x(p+1, s+2) ... x(p+1, s+n) ) ... ( x(p+m, s) ⋁ x(p+m, s+1) ⋁ x(p+m, s+2) ... x(p+m, s+n) )
+     */
+
+    // Create clause for every subject and add literal for every semester
+    for (int i = 0; i < num_of_subjects; ++i) {
+        // Create a new clause for every subject
+        Clause *subject_enrolled_at_least_once_clause = create_new_clause(num_of_subjects, num_of_semesters);
+
+        // Add literal for every semester
+        for (int j = 0; j < num_of_semesters; ++j) {
+            add_literal_to_clause(subject_enrolled_at_least_once_clause, true, i, j);
+        }
+
+        // Add clause to the formula
+        add_clause_to_formula(subject_enrolled_at_least_once_clause, formula);
+    }
 }
 
 // Tato funkce by mela do formule pridat klauzule predstavujici podminku b)
