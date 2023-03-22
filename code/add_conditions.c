@@ -113,9 +113,35 @@ void add_prerequisities_to_formula(CNF *formula, Prerequisity* prerequisities, u
     assert(num_of_subjects > 0);
     assert(num_of_semesters > 0);
 
-    for (unsigned i = 0; i < num_of_prerequisities; ++i) {
-        // prerequisities[i].earlier_subject je predmet, ktery by si mel student zapsat v nekterem semestru pred predmetem prerequisities[i].later_subject
+    /*
+     * e = earlier subject
+     * l = later subject
+     * s = semester
+     *
+     * Is the earlier subject completed before the later subject
+     * ¬x(e, s) ⋁ ¬x(l, t)
+     *
+     * This is repeated multiple times, the way I described it in each_subject_enrolled_at_most_once is very confusing
+     * and took me a lot of time to write correctly, so I'm just going to skip it here. I think the code comments bellow
+     * are sufficient enough to explain how it works.
+     * */
 
-        // ZDE PRIDAT KOD
+    // Iterates through all prerequisities
+    for (unsigned i = 0; i < num_of_prerequisities; ++i) {
+        for (int j = 0; j < num_of_semesters; ++j) {
+            for (int k = 0; k < j + 1; ++k) {
+                // Creates clause for all possible combinations of semesters in which the requirement can be fulfilled
+                Clause *example_clause = create_new_clause(num_of_subjects, num_of_semesters);
+
+                // Add literal for two different semesters
+                // ¬x(e, s)
+                add_literal_to_clause(example_clause, false,prerequisities[i].earlier_subject, j);
+                // ¬x(l, t)
+                add_literal_to_clause(example_clause, false,prerequisities[i].later_subject, k);
+
+                // Add clause to formula
+                add_clause_to_formula(example_clause, formula);
+            }
+        }
     }
 }
